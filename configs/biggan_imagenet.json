@@ -1,0 +1,15 @@
+{
+ 
+    "rec_lr" : 0.1,
+    "alpha" : 15.0,
+    "beta" : 1.0,
+    
+    "proto_lr" : 0.0,
+    "Lambda" : 0.0,
+    
+    "impr_lr" : 0.0,
+    "min_sigma" : 0.,
+    "max_sigma" : 0.0,
+    "startSigma" : 0.0
+ 
+}

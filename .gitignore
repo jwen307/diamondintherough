@@ -1,3 +1,11 @@
+#
+model_types/pretrained/
+model_types/biggan_funcs.py
+metrics/dataset_fid_stats/
+results/
+.ipynb_checkpoints
+.vscode
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

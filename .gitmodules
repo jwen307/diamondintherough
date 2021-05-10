@@ -1,0 +1,15 @@
+[submodule "metrics/TTUR"]
+	path = metrics/TTUR
+	url = https://github.com/jwen307/TTUR.git
+[submodule "model_types/BigGANPyTorch"]
+	path = model_types/BigGANPyTorch
+	url = https://github.com/jwen307/BigGAN-PyTorch.git
+[submodule "model_types/pytorch_GAN_zoo"]
+	path = model_types/pytorch_GAN_zoo
+	url = https://github.com/jwen307/pytorch_GAN_zoo.git
+[submodule "model_types/progressive_growing_of_gans"]
+	path = model_types/progressive_growing_of_gans
+	url = https://github.com/jwen307/progressive_growing_of_gans.git
+[submodule "model_types/ganseeing"]
+	path = model_types/ganseeing
+	url = https://github.com/jwen307/ganseeing.git
