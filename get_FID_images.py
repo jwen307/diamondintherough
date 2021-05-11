@@ -105,7 +105,7 @@ if __name__ == '__main__':
         protoLatents = torch.load(proto_dir)
         protoMean = utils.normalize(protoLatents.mean(dim=0).unsqueeze(0))
         
-        for j in range(1,4):
+        for j in range(1,5):
             
             for k in range(2):
                 #Fraction of distance to move
@@ -131,7 +131,7 @@ if __name__ == '__main__':
             #Get the boundary direction
             boundary = torch.Tensor(np.load('boundary.npy'))
             
-            for j in range(1,9):
+            for j in range(1,5):
                 
                 for k in range(2):
                     #Fraction of distance to move
