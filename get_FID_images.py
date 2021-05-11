@@ -22,6 +22,7 @@ import os
 import pandas as pd
 import numpy as np
 import math
+import argparse
 
 import sys
 sys.path.append('.')
@@ -31,7 +32,7 @@ from functions import utils, gan_utils
 
 
 #%%
-
+'''
 pretrained_dir = 'model_types/pretrained/'
 model_type = 'pgan'
 dataset = 'celeba'
@@ -40,12 +41,33 @@ num_samples = 2000
 minibatch_size = 5
 proto_dir = 'results/pgan_celeba_trial5/pgan_celeba_protomean.pt'
 boundary_dir = None
-
+'''
 
 
 #%%
 
 if __name__ == '__main__':
+    
+    #Get arguments from the user
+    parser = argparse.ArgumentParser(description='Run latent space improvement and produce images for FID')
+    parser.add_argument('--model_type', default='pgan', help='Model type. Options: pgan, wgangp, biggan')
+    parser.add_argument('--dataset',default='celeba', help='Dataset that model was trained on. Options: celeba, celebaHQ512, celebaHQ1024, church, train, imagenet')
+    parser.add_argument('--category', default=963, type = int, help = 'BigGAN category to run')
+    parser.add_argument('--num_samples', default=10000, type = int, help = 'Number of images to produce')
+    parser.add_argument('--proto_dir', help = 'Location of the protomean.pt file (results/some_trial/model_dataset_protomean.pt)')
+    parser.add_argument('--minibatch_size', default = 5, type = int, help = 'Number of images in each minibatch')
+    parser.add_argument('--boundary_dir', default = None, help = 'Location of the boundary.npy file (for comparison with Shen2020)')
+    args = parser.parse_args()
+    
+    pretrained_dir = 'model_types/pretrained/'
+    model_type = args.model_type
+    dataset = args.dataset
+    category = args.category
+    num_samples = args.num_samples
+    minibatch_size = args.minibatch_size
+    proto_dir = args.proto_dir
+    boundary_dir = None
+    
     
     #Set the device
     if torch.cuda.is_available():

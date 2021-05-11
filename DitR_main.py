@@ -83,6 +83,21 @@ if __name__ == '__main__':
         
     else:
         config = utils.read_json('configs/{0}_{1}.json'.format(model_type,dataset))
+        if config['encoder_file'] == 'None':
+            encoder_file = None
+        else:
+            encoder_file = config['encoder_file']
+        rec_lr = config['rec_lr']
+        alpha = config['alpha']
+        beta = config['beta']
+        
+        proto_lr = config['proto_lr']
+        Lambda = config['Lambda']
+        
+        min_sigma = config['min_sigma']
+        max_sigma = config['max_sigma']
+        impr_lr = config['impr_lr']
+        startSigma = config['startSigma']
     
     
     #Set the device

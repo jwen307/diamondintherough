@@ -14,6 +14,8 @@ import torch
 import torchvision
 
 from collections import OrderedDict
+import argparse
+import pandas as pd
 
 
 
@@ -24,14 +26,24 @@ from tqdm import tqdm
 
 #%% 
         
-dataset_dir = None
-dataset_name = None
-dataset_stats_dir = 'dataset_fid_stats/' 
-dataset_stats_name = 'celebastats.npz'
-dataset_stats_file = dataset_stats_dir + dataset_stats_name
-fid_img_dir = '../results/pgan_celeba_FID_Images/'
+
 
 if __name__ == '__main__':
+    
+    parser = argparse.ArgumentParser(description='Find the FID of the images in the folders')
+    parser.add_argument('--dataset_stats_dir', default='dataset_fid_stats/', help='Location of the dataset statistics folder')
+    parser.add_argument('--dataset_stats_name',  help='Name of the datset statistics file (Ex: celebastats.npz)')
+    parser.add_argument('--fid_img_dir', help='Location of the FID image folder (Ex:../results/pgan_celeba_FID_Images/')
+    parser.add_argument('--dataset_dir', default = None, help='Location of dataset directory')
+    parser.add_argument('--dataset_name', help='Name of the dataset')
+    args = parser.parse_args()
+    
+    dataset_dir = args.dataset_dir
+    dataset_name = args.dataset_name
+    dataset_stats_dir = args.dataset_stats_dir
+    dataset_stats_name = args.dataset_stats_name
+    dataset_stats_file = dataset_stats_dir + dataset_stats_name
+    fid_img_dir = args.fid_img_dir
     
     if dataset_stats_name is None:
         
@@ -84,4 +96,8 @@ if __name__ == '__main__':
     
     for key,value in fid_score.items():
         print(key,value)
+        
+    #Save the results
+    fid_pd = pd.Dataframe.from_dict(fid_score.items())
+    fid_pd.to_csv(fid_img_dir + 'fid_score.csv')
     

@@ -10,6 +10,8 @@
     "impr_lr" : 0.01,
     "min_sigma" : 0.4,
     "max_sigma" : 0.6,
-    "startSigma" : 0.5
+    "startSigma" : 0.5,
+    
+    "encoder_file": "model_types/pretrained/encoder/church/invert_hybrid_cse/snapshots/epoch_100.pth.tar"
  
 }
