@@ -81,7 +81,7 @@ def get_latent_vector(imgs, ys, ys_shared, features, init, model, model_type, de
         opt = optim.Adam([zp], lr = 0.1)
         
         #Learning rate scheduler
-        sched = optim.lr_scheduler.StepLR(optimizer = opt, step_size = 100, gamma = 0.1)
+        sched = optim.lr_scheduler.StepLR(optimizer = opt, step_size = 200, gamma = 0.1)
 
         #Define the loss function
         lossfn = nn.L1Loss()

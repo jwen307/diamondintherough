@@ -29,6 +29,8 @@ def proto_optim(og_latents,recovered_latents, model, model_type, device, lr = 0.
 
     '''
     
+    print('Searching for the protoimage latent vector...')
+    
     #Get the number of samples and the dimensionality
     num_samples, num_dims = og_latents.size()
     
@@ -114,9 +116,9 @@ def proto_optim(og_latents,recovered_latents, model, model_type, device, lr = 0.
             diff = y - x
             
             #Show the progress
-            if i % 1 == 0:
-                print('Iterations: ' + str(i))
-                print('Loss: ' + str(loss))
+            # if i % 1 == 0:
+            #     print('Iterations: ' + str(i))
+            #     print('Loss: ' + str(loss))
             
         protoLatents[batch_num * minibatch_size: end] = ynew.detach().cpu()
     

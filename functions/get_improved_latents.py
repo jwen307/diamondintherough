@@ -30,6 +30,7 @@ def improve_latents(og_latents,protoLatents, model, model_type, device, lr = 0.1
 
 
     '''
+    print('Finding the improved latent...')
     
     #Get the number of samples and the dimensionality
     num_samples, num_dims = og_latents.size()
@@ -110,9 +111,9 @@ def improve_latents(og_latents,protoLatents, model, model_type, device, lr = 0.1
             else:
                 oldLoss = loss
             
-            if i % 1 == 0:
-                print('Iterations: ' + str(i))
-                print('Loss: ' + str(loss))
+            # if i % 1 == 0:
+            #     print('Iterations: ' + str(i))
+            #     print('Loss: ' + str(loss))
                 
             #Project back into space if leaves the bounds   
             with torch.no_grad():

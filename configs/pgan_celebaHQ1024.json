@@ -5,11 +5,11 @@
     "beta" : 1.0,
     
     "proto_lr" : 0.1,
-    "Lambda" : 200.0,
+    "Lambda" : 50.0,
     
     "impr_lr" : 0.01,
-    "min_sigma" : 0.5,
-    "max_sigma" : 0.75,
+    "min_sigma" : 0.4,
+    "max_sigma" : 0.70,
     "startSigma" : 0.6,
     
     "encoder_file": "None"

@@ -98,6 +98,6 @@ if __name__ == '__main__':
         print(key,value)
         
     #Save the results
-    fid_pd = pd.Dataframe.from_dict(fid_score.items())
+    fid_pd = pd.DataFrame.from_dict(fid_score.items())
     fid_pd.to_csv(fid_img_dir + 'fid_score.csv')
     

@@ -38,10 +38,10 @@ if __name__ == '__main__':
     parser.add_argument('--model_type', default='pgan', help='Model type. Options: pgan, wgangp, biggan')
     parser.add_argument('--dataset',default='celeba', help='Dataset that model was trained on. Options: celeba, celebaHQ512, celebaHQ1024, church, train, imagenet')
     parser.add_argument('--category', default=963, type = int, help = 'BigGAN category to run')
-    parser.add_argument('--num_samples', default=5, type = int, help = 'Number of images to produce')
-    parser.add_argument('--minibatch_size', default=5, type = int, help = 'Number of samples in each minibatch')
+    parser.add_argument('--num_samples', default=10, type = int, help = 'Number of images to produce')
+    parser.add_argument('--minibatch_size', default=10, type = int, help = 'Number of samples in each minibatch')
     parser.add_argument('--encoder_file', default=None, help = 'Location of encoder network weights (Ex: encoder.pth.tar)')
-    parser.add_argument('--non_default_config', action='store_false', help = 'Use your own hyperparmenter values')
+    parser.add_argument('--non_default_config', action='store_true', help = 'Use your own hyperparmenter values')
     
     parser.add_argument('--rec_lr', default = 0.1, type = float, help = 'Learning rate for the GAN inversion optimization')
     parser.add_argument('--alpha', default = 2.0, type = float,help = 'Weight for the discriminator feature space loss term')
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         max_sigma = config['max_sigma']
         impr_lr = config['impr_lr']
         startSigma = config['startSigma']
-    
+        
     
     #Set the device
     if torch.cuda.is_available():
@@ -176,3 +176,4 @@ if __name__ == '__main__':
                 trial += 1
         gan_utils.progression_look(gen_latents,recoveredLatents, y, y_shared, model, model_type, 8, img_dir, minibatch_size)
         
+    print('Complete')
