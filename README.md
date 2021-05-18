@@ -1,7 +1,5 @@
 # Diamond in the Rough
 
-Note: The code is still in beta and is currently being refined.
-
 This is the implementation of the method proposed in [Diamond in the Rough: improving image realism by traversing the GAN latent space](https://arxiv.org/abs/2104.05518)
 
 
