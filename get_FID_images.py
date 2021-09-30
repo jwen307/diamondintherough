@@ -3,12 +3,7 @@
 """
 Created on Thu Mar  4 13:55:10 2021
 
-@author: jeff
-
-main.py
-
-
-
+get_FID_images.py
 """
 
 
@@ -35,12 +30,14 @@ from functions import utils, gan_utils
 '''
 pretrained_dir = 'model_types/pretrained/'
 model_type = 'pgan'
-dataset = 'celeba'
+dataset = 'church'
 category = 963
-num_samples = 2000
+num_samples = 10000
 minibatch_size = 5
-proto_dir = 'results/pgan_celeba_trial5/pgan_celeba_protomean.pt'
+#proto_dir = 'results/pgan_celeba_trial8/pgan_celeba_protomean.pt'
+proto_dir = 'results/pgan_church_trial0/pgan_church_protomean.pt'
 boundary_dir = None
+trunc=True
 '''
 
 
@@ -57,6 +54,7 @@ if __name__ == '__main__':
     parser.add_argument('--proto_dir', help = 'Location of the protomean.pt file (results/some_trial/model_dataset_protomean.pt)')
     parser.add_argument('--minibatch_size', default = 5, type = int, help = 'Number of images in each minibatch')
     parser.add_argument('--boundary_dir', default = None, help = 'Location of the boundary.npy file (for comparison with Shen2020)')
+    parser.add_argument('--trunc', action='store_true', help = 'Also include images from using the truncation trick')
     args = parser.parse_args()
     
     pretrained_dir = 'model_types/pretrained/'
@@ -66,7 +64,8 @@ if __name__ == '__main__':
     num_samples = args.num_samples
     minibatch_size = args.minibatch_size
     proto_dir = args.proto_dir
-    boundary_dir = None
+    boundary_dir = args.boundary_dir
+    trunc = args.trunc
     
     
     #Set the device
@@ -80,11 +79,24 @@ if __name__ == '__main__':
     save_dir = 'results/{0}_{1}_FID_Images'.format(model_type,dataset)   
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+        
+    #Get a new folder to save results to
+    new = False
+    trial = 0
+    while not new:
+        #Directory to save the results
+        save_dir = 'results/{0}_{1}_FID_Images{2}'.format(model_type,dataset,trial)   
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+            new = True
+        else:
+            trial += 1
     
     
     #Get the GAN model
     model = gan_utils.get_model(pretrained_dir, ganType = model_type, dataset = dataset)
 #%%    
+    
     #Larger images need to be split up into batches
     num_in_batch = 1000
     batches = int(num_samples/num_in_batch)
@@ -150,5 +162,28 @@ if __name__ == '__main__':
                     #Save the images
                     for i in range(num_in_batch):
                         utils.save_img(newImgs[i],(batch*num_in_batch)+i,save_dir + '/boundary{0:.2f}/boundary{0:.2f}/'.format(k))
-                        
 
+
+        #load_dir = '../Data/GeneratedImages/celebahq1024_10000imgs/'
+        if trunc:
+            
+            radii = [1.0, 0.75, 0.50, 0.25, 0.10]
+            
+            for radius in radii:
+            
+                #Larger images need to be split up into batches
+                #num_in_batch = 1000
+                #batches = int(num_samples/num_in_batch)
+                #for batch in range(0,batches):
+                    
+                #gen_latents = torch.load(load_dir + 'random_latents{0}.pt'.format(batch))
+                
+                #Apply the truncation trick
+                trunc_latents = utils.truncation_trick(gen_latents,radius)
+                
+                #Get the images
+                trunc_imgs = gan_utils.get_images(trunc_latents, None, model, model_type, minibatch_size).detach().cpu()
+                
+                #Save the images
+                for i in range(num_in_batch):
+                    utils.save_img(trunc_imgs[i],(batch*num_in_batch)+i,save_dir + '/trunc{0:.2f}/trunc{0:.2f}/'.format(radius))

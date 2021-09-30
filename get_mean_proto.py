@@ -41,11 +41,11 @@ if __name__ == '__main__':
     parser.add_argument('--num_samples', default=1000, type = int, help = 'Number of images to produce')
     parser.add_argument('--minibatch_size', default=5, type = int, help = 'Number of samples in each minibatch')
     parser.add_argument('--encoder_file', default=None, help = 'Location of encoder network weights (Ex: encoder.pth.tar)')
-    parser.add_argument('--non_default_config', action='store_false', help = 'Use your own hyperparmenter values')
+    parser.add_argument('--non_default_config', action='store_true', help = 'Use your own hyperparmenter values')
     
     parser.add_argument('--rec_lr', default = 0.1, type = float, help = 'Learning rate for the GAN inversion optimization')
     parser.add_argument('--alpha', default = 2.0, type = float,help = 'Weight for the discriminator feature space loss term')
-    parser.add_argument('--beta', default = 0.1, type = float,help = 'Weight for the loss term keeping the search on the hypersphere')
+    parser.add_argument('--beta', default = 1.0, type = float,help = 'Weight for the loss term keeping the search on the hypersphere')
     
     parser.add_argument('--proto_lr', default = 0.1, type = float,help = 'Learning rate for protoimage optimization')
     parser.add_argument('--Lambda', default = 3.0, type = float,help = 'Weight for the cosine similarity term')
@@ -62,6 +62,7 @@ if __name__ == '__main__':
     num_samples = args.num_samples
     minibatch_size = args.minibatch_size
     
+
     if args.non_default_config:
         #encoder_file = pretrained_dir + 'epoch_100.pth.tar'
         encoder_file = args.encoder_file
@@ -74,6 +75,7 @@ if __name__ == '__main__':
 
         
     else:
+        print('Using Default Configuration')
         config = utils.read_json('configs/{0}_{1}.json'.format(model_type,dataset))
         if config['encoder_file'] == 'None':
             encoder_file = None
