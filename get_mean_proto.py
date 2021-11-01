@@ -26,8 +26,33 @@ import argparse
 
 import sys
 
+'''
+model_type = 'pgan'
+dataset = 'celebaHQ1024'
+category = 963
+num_samples = 10
+minibatch_size = 5
 
+pretrained_dir = 'model_types/pretrained/'
 
+print('Using Default Configuration')
+config = utils.read_json('configs/{0}_{1}.json'.format(model_type,dataset))
+if config['encoder_file'] == 'None':
+    encoder_file = None
+else:
+    encoder_file = config['encoder_file']
+rec_lr = config['rec_lr']
+alpha = config['alpha']
+beta = config['beta']
+
+proto_lr = config['proto_lr']
+Lambda = config['Lambda']
+
+min_sigma = config['min_sigma']
+max_sigma = config['max_sigma']
+impr_lr = config['impr_lr']
+startSigma = config['startSigma']
+'''
 #%%
 
 if __name__ == '__main__':
@@ -53,8 +78,6 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
-    pretrained_dir = 'model_types/pretrained/'
-    
     #Set the values of constants and hyperparameters. If you don't want to run from a command line, comment out the parser and enter values here.
     model_type = args.model_type
     dataset = args.dataset
@@ -62,6 +85,8 @@ if __name__ == '__main__':
     num_samples = args.num_samples
     minibatch_size = args.minibatch_size
     
+    
+    pretrained_dir = 'model_types/pretrained/'
 
     if args.non_default_config:
         #encoder_file = pretrained_dir + 'epoch_100.pth.tar'
@@ -105,30 +130,9 @@ if __name__ == '__main__':
     save_dir = 'results/'   
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
- 
-
-    #Get the GAN model
-    model = gan_utils.get_model(pretrained_dir, ganType = model_type, dataset = dataset)
-    
-
-#%%    
-    #Generate random images and the latent vectors
-    gen_imgs, gen_latents, y_shared, y = gan_utils.fake_samples_gen(num_samples, model, model_type, category, minibatch_size)
-    gen_latents = utils.normalize(gen_latents)
-    
-    #Get the initialization for the GAN inversion
-    init, features = inverse_gan_optim.get_init(gen_imgs, model, model_type, y, category, minibatch_size, encoder_file)
-#%%    
-    #Invert the generator to recover the latent vectors
-    recoveredLatents = inverse_gan_optim.get_latent_vector(gen_imgs, y, y_shared, features, init.to(device), model, model_type, device, minibatch_size, rec_lr, alpha, beta, max_iter = 501, epsilon = 0.0001)
-    recoveredLatents = utils.normalize(recoveredLatents)
-    
-#%% 
-    
-    #Optimize to get the band images
-    protoLatents = proto_optim(gen_latents, recoveredLatents, model, model_type, device, proto_lr, Lambda, epsilon = 0.0001, minibatch_size = minibatch_size)
-    
+        
     #Get a new folder to save results to
+    
     new = False
     trial = 0
     while not new:
@@ -138,6 +142,39 @@ if __name__ == '__main__':
             new = True
         else:
             trial += 1
+            
+
+    #img_dir = 'results/pgan_celebaHQ1024_trial7/'
+
+    #Get the GAN model
+    model = gan_utils.get_model(pretrained_dir, ganType = model_type, dataset = dataset)
+    
+
+#%%    
+
+    #Generate random images and the latent vectors
+    gen_imgs, gen_latents, y_shared, y = gan_utils.fake_samples_gen(num_samples, model, model_type, category, minibatch_size)
+    gen_latents = utils.normalize(gen_latents)
+    
+    torch.save(gen_latents, img_dir + '{0}_{1}_genlatents.pt'.format(model_type, dataset))
+    
+    #Get the initialization for the GAN inversion
+    init, features = inverse_gan_optim.get_init(gen_imgs, model, model_type, y, category, minibatch_size, encoder_file)
+#%%    
+    #Invert the generator to recover the latent vectors
+    recoveredLatents = inverse_gan_optim.get_latent_vector(gen_imgs, y, y_shared, features, init.to(device), model, model_type, device, minibatch_size, rec_lr, alpha, beta, max_iter = 501, epsilon = 0.0001)
+    recoveredLatents = utils.normalize(recoveredLatents)
+    
+    torch.save(recoveredLatents, img_dir + '{0}_{1}_recovered.pt'.format(model_type, dataset))
+
+    
+    #recoveredLatents = torch.load('results/pgan_celebaHQ1024_trial7/pgan_celebaHQ1024_recovered.pt')
+#%% 
+    
+    #Optimize to get the band images
+    protoLatents = proto_optim(gen_latents, recoveredLatents, model, model_type, device, proto_lr, Lambda, epsilon = 0.0001, minibatch_size = minibatch_size)
+    
+    torch.save(protoLatents, img_dir + '{0}_{1}_protolatents.pt'.format(model_type, dataset))
     
     #Get the mean proto latent
     protoMean = utils.normalize(protoLatents.mean(dim=0).unsqueeze(0))

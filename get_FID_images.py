@@ -114,8 +114,9 @@ if __name__ == '__main__':
     
     #%%    
         #Get the protolatents
-        protoLatents = torch.load(proto_dir)
-        protoMean = utils.normalize(protoLatents.mean(dim=0).unsqueeze(0))
+        #protoLatents = torch.load(proto_dir)
+        #protoMean = utils.normalize(protoLatents.mean(dim=0).unsqueeze(0))
+        protoMean = torch.load(proto_dir)
         
         for j in range(1,6):
             
@@ -153,7 +154,7 @@ if __name__ == '__main__':
                         a = j*0.1
                     
                     #Get latents in the boundary direction
-                    betterLatents = (k*boundary.detach().cpu()) + gen_latents.detach().cpu()
+                    betterLatents = (a*boundary.detach().cpu()) + gen_latents.detach().cpu()
                     betterLatents = utils.normalize(betterLatents)
                     
                     #Get the images for this alpha
@@ -161,7 +162,7 @@ if __name__ == '__main__':
                     
                     #Save the images
                     for i in range(num_in_batch):
-                        utils.save_img(newImgs[i],(batch*num_in_batch)+i,save_dir + '/boundary{0:.2f}/boundary{0:.2f}/'.format(k))
+                        utils.save_img(newImgs[i],(batch*num_in_batch)+i,save_dir + '/boundary{0:.2f}/boundary{0:.2f}/'.format(a))
 
 
         #load_dir = '../Data/GeneratedImages/celebahq1024_10000imgs/'

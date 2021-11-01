@@ -82,6 +82,7 @@ if __name__ == '__main__':
         startSigma = args.startSigma
         
     else:
+        print('Using Default Configuration')
         config = utils.read_json('configs/{0}_{1}.json'.format(model_type,dataset))
         if config['encoder_file'] == 'None':
             encoder_file = None
