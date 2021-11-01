@@ -3,8 +3,6 @@
 """
 Created on Thu Mar  4 08:09:18 2021
 
-@author: jeff
-
 gan_utils.py
     - Common functions for the GAN
 

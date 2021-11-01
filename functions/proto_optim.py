@@ -3,7 +3,6 @@
 """
 Created on Thu Mar  4 08:24:48 2021
 
-@author: jeff
 
 proto_optim.py
     - Find the protoimage vectors
