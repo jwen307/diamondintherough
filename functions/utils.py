@@ -3,7 +3,6 @@
 """
 Created on Thu Mar  4 07:54:34 2021
 
-@author: jeff
 
 utils.py
     - Commonly used functions

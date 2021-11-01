@@ -3,7 +3,7 @@
 """
 Created on Thu Mar  4 08:24:48 2021
 
-@author: jeff
+inverse_gan_optim.py
 """
 
 import torch

@@ -3,9 +3,6 @@
 """
 Created on Mon May  4 07:36:11 2020
 
-@author: jeff
-`
-
 """
 import tensorflow as tf
 import numpy as np
@@ -73,7 +70,7 @@ if __name__ == '__main__':
         #Skip if it is not a folder of images
         if not os.path.isdir(fid_img_dir + folder):
             continue
-    
+        
         if not os.path.exists(fid_img_dir+'{0}.npz'.format(folder)):
             #Find the statistics for the dataset
             inception_path = fid.check_or_download_inception(None)
