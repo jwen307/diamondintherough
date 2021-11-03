@@ -173,6 +173,7 @@ if __name__ == '__main__':
     
     #Optimize to get the band images
     protoLatents = proto_optim(gen_latents, recoveredLatents, model, model_type, device, proto_lr, Lambda, epsilon = 0.0001, minibatch_size = minibatch_size)
+    protoLatents = utils.normalize(protoLatents)
     
     torch.save(protoLatents, img_dir + '{0}_{1}_protolatents.pt'.format(model_type, dataset))
     

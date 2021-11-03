@@ -51,7 +51,8 @@ if __name__ == '__main__':
     parser.add_argument('--dataset',default='celeba', help='Dataset that model was trained on. Options: celeba, celebaHQ512, celebaHQ1024, church, train, imagenet')
     parser.add_argument('--category', default=963, type = int, help = 'BigGAN category to run')
     parser.add_argument('--num_samples', default=10000, type = int, help = 'Number of images to produce')
-    parser.add_argument('--proto_dir', help = 'Location of the protomean.pt file (results/some_trial/model_dataset_protomean.pt)')
+    parser.add_argument('--proto_dir', help = 'Location of the protomean.pt or protolatents.pt file (results/some_trial/model_dataset_protomean.pt)')
+    parser.add_argument('--latent_dir', default=None, help = 'Location of the genlatents.pt file (results/some_trial/model_dataset_genlatents.pt)')
     parser.add_argument('--minibatch_size', default = 5, type = int, help = 'Number of images in each minibatch')
     parser.add_argument('--boundary_dir', default = None, help = 'Location of the boundary.npy file (for comparison with Shen2020)')
     parser.add_argument('--trunc', action='store_true', help = 'Also include images from using the truncation trick')
@@ -64,6 +65,7 @@ if __name__ == '__main__':
     num_samples = args.num_samples
     minibatch_size = args.minibatch_size
     proto_dir = args.proto_dir
+    latent_dir = args.latent_dir
     boundary_dir = args.boundary_dir
     trunc = args.trunc
     
@@ -96,27 +98,45 @@ if __name__ == '__main__':
     #Get the GAN model
     model = gan_utils.get_model(pretrained_dir, ganType = model_type, dataset = dataset)
 #%%    
+    #Can be the mean protolatent or individual protolatents
+    protoLatents = torch.load(proto_dir)    
     
+    if latent_dir is not None:
+        gen_latents_all = torch.load(latent_dir)
+
     #Larger images need to be split up into batches
     num_in_batch = 1000
     batches = int(num_samples/num_in_batch)
     for batch in range(0,batches):
     
-        #Generate random images and the latent vectors
-        gen_imgs, gen_latents, y_shared, y = gan_utils.fake_samples_gen(num_in_batch, model, model_type, category, minibatch_size)
-        gen_latents = utils.normalize(gen_latents)
+        #If you already have generated latent vectors, use those
+        if latent_dir is not None:
+            gen_latents = gen_latents_all[batch*num_in_batch: (batch+1)*num_in_batch]
+            y_shared, y = None, None
+            gen_imgs = gan_utils.get_images(gen_latents, None, model, model_type, minibatch_size)
+
         
-        #Save the latents
-        torch.save(gen_latents, save_dir + '/random_latents{0}.pt'.format(batch))
+        else:
+            #Generate random images and the latent vectors
+            gen_imgs, gen_latents, y_shared, y = gan_utils.fake_samples_gen(num_in_batch, model, model_type, category, minibatch_size)
+            gen_latents = utils.normalize(gen_latents)
+            
+            #Save the latents
+            torch.save(gen_latents, save_dir + '/random_latents{0}.pt'.format(batch))
+            
+        #Save the generated images
         for i in range(num_in_batch):
             utils.save_img(gen_imgs[i],(batch*num_in_batch)+i,save_dir + '/RandomImages/RandomImages/')
-        
+            
     
     #%%    
         #Get the protolatents
         #protoLatents = torch.load(proto_dir)
         #protoMean = utils.normalize(protoLatents.mean(dim=0).unsqueeze(0))
-        protoMean = torch.load(proto_dir)
+        #Can be the mean protolatent or individual protolatents
+        #protoLatents = torch.load(proto_dir)
+        if len(protoLatents) > 1:
+            batch_proto = protoLatents[batch*num_in_batch: (batch+1)*num_in_batch]
         
         for j in range(1,6):
             
@@ -128,7 +148,7 @@ if __name__ == '__main__':
                     a = j*0.1
             
                 #Find a point in between the vector between the original image and band image
-                betterLatents = (a*protoMean.detach().cpu()) + (1-a)*gen_latents.detach().cpu()
+                betterLatents = (a*batch_proto.detach().cpu()) + (1-a)*gen_latents.detach().cpu()
                 betterLatents = utils.normalize(betterLatents)
                 
                 #Get the images for this alpha
