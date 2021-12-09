@@ -45,27 +45,42 @@ python DitR_main.py --model_type <model> --dataset <dataset> --category<BigGAN c
 ```
 An example is shown below. To see the other possible inputs, please look at DitR_main.py. 
 ```bash
-python DitR_main.py --model_type pgan --dataset celeba
+python DitR_main.py --model_type 'pgan' --dataset 'celeba'
 ```
 Configuration files with the specific hyperparameters used for the models and datasets in the paper can be found in the 'configs' folder. These configurations are used be default when calling the main method for ease of reproducability. 
 
 The results of the method will be found in the 'results' folder of the main repo directory. 
 
 ### Evaluation
-To increase the speed of the method for application to thousands of images, we utilize the variation discussed in the Supplemental Material of the paper. This variation takes the mean of the protoimage latent vectors for a large number of samples (1000 by default). Subsequent samples are pushed in the direction of this mean protoimage latent vector to improve the image realism. This reduces the burden of finding a unique protoimage for every sample. 
+To find the protoimage for each sample, run
+```bash
+python get_all_proto.py --model_type 'pgan' --dataset 'celeba' --num_samples 10000 --minibatch_size 20
+```
+
+To increase the speed of the method for application to thousands of images, we can utilize the variation discussed in the Supplemental Material of the paper. This variation takes the mean of the protoimage latent vectors for a large number of samples (1000 by default). Subsequent samples are pushed in the direction of this mean protoimage latent vector to improve the image realism. This reduces the burden of finding a unique protoimage for every sample. 
 
 To find the mean protoimage vector, run
 ```bash
-python get_mean_proto.py --model_type pgan --dataset celeba
+python get_mean_proto.py --model_type 'pgan' --dataset 'celeba'
 ```
-The optional parameters are the same as for DitR_main.py.
+The optional parameters are the same as for DitR_main.py. 
+Note: While we observe similar qualitative improvements to the image realism with a single protoimage, we find the FID score does not improve as it does when each protoimage is found for each sample.
 
-Now, we need to generate at least 10,000 images to evaluate the FID score. For this, we generate images for several different steps along the geodesic between the original images and the mean protoimage vector. This shows the progression of the FID score as we move along the hypersphere towards the mean protoimage vector. To generate this images, run
+Now, we need to generate at least 10,000 images to evaluate the FID score. For this, we generate images for several different steps along the geodesic between the original vectors and the protoimage vectors. This shows the progression of the FID score as we move along the hypersphere towards the protoimage vectors. To generate these images, run
+
+```bash 
+python get_FID_images.py --proto_dir <location of protolatents.pt file> --latent_dir <location of genlatents.pt file>
+
+#Example
+python get_FID_images.py --proto_dir 'results/pgan_celeba_trial1/pgan_celeba_protolatents.pt' --latent_dir 'results/pgan_celeba_trial1/pgan_celeba_genlatents.pt'
+```
+
+If using the mean protoimage variation, use this instead:
 ```bash
 python get_FID_images.py --proto_dir <location of mean protoimage vector .pt file>
 
 #Example
-python get_FID_images.py --proto_dir results/pgan_celeba_trial1/pgan_celeba_protomean.pt
+python get_FID_images.py --proto_dir 'results/pgan_celeba_trial1/pgan_celeba_protomean.pt'
 ```
 Optional parameters should be entered as the same for the get_mean_proto.py.
 
@@ -75,10 +90,11 @@ cd metrics
 python GetFID.py --fid_img_dir <location of the image folders generated from get_FID_images.py> --dataset_stats_name <name of the stats file>
 
 #Example
-python GetFID.py --fid_img_dir  ../results/pgan_celeba_FID_Images/ --dataset_stats_name celebastats.npz
+python GetFID.py --fid_img_dir  '../results/pgan_celeba_FID_Images/ --dataset_stats_name celebastats.npz'
 ```
 This will show the FID scores and save the scores to a .csv file in the fid_img_dir folder.
 If you want to use a different dataset, you can enter the directory of the dataset using the optional parameters.
+
 
 ## Citations
 
