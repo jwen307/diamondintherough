@@ -131,10 +131,7 @@ if __name__ == '__main__':
     
     #%%    
         #Get the protolatents
-        #protoLatents = torch.load(proto_dir)
-        #protoMean = utils.normalize(protoLatents.mean(dim=0).unsqueeze(0))
-        #Can be the mean protolatent or individual protolatents
-        #protoLatents = torch.load(proto_dir)
+
         if len(protoLatents) > 1:
             batch_proto = protoLatents[batch*num_in_batch: (batch+1)*num_in_batch]
         
@@ -185,20 +182,13 @@ if __name__ == '__main__':
                         utils.save_img(newImgs[i],(batch*num_in_batch)+i,save_dir + '/boundary{0:.2f}/boundary{0:.2f}/'.format(a))
 
 
-        #load_dir = '../Data/GeneratedImages/celebahq1024_10000imgs/'
+
         if trunc:
             
             radii = [1.0, 0.75, 0.50, 0.25, 0.10]
             
             for radius in radii:
-            
-                #Larger images need to be split up into batches
-                #num_in_batch = 1000
-                #batches = int(num_samples/num_in_batch)
-                #for batch in range(0,batches):
-                    
-                #gen_latents = torch.load(load_dir + 'random_latents{0}.pt'.format(batch))
-                
+
                 #Apply the truncation trick
                 trunc_latents = utils.truncation_trick(gen_latents,radius)
                 

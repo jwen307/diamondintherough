@@ -63,7 +63,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_type', default='pgan', help='Model type. Options: pgan, wgangp, biggan')
     parser.add_argument('--dataset',default='celeba', help='Dataset that model was trained on. Options: celeba, celebaHQ512, celebaHQ1024, church, train, imagenet')
     parser.add_argument('--category', default=963, type = int, help = 'BigGAN category to run')
-    parser.add_argument('--num_samples', default=1000, type = int, help = 'Number of images to produce')
+    parser.add_argument('--num_samples', default=10000, type = int, help = 'Number of images to produce')
     parser.add_argument('--minibatch_size', default=5, type = int, help = 'Number of samples in each minibatch')
     parser.add_argument('--encoder_file', default=None, help = 'Location of encoder network weights (Ex: encoder.pth.tar)')
     parser.add_argument('--non_default_config', action='store_true', help = 'Use your own hyperparmenter values')
@@ -141,39 +141,58 @@ if __name__ == '__main__':
             new = True
         else:
             trial += 1
-            
+           
+
     #Get the GAN model
     model = gan_utils.get_model(pretrained_dir, ganType = model_type, dataset = dataset)
     
 
 #%%    
+    genLatents_all = []
+    recoveredLatents_all = []
+    protoLatents_all = []
+    
 
-    #Generate random images and the latent vectors
-    gen_imgs, gen_latents, y_shared, y = gan_utils.fake_samples_gen(num_samples, model, model_type, category, minibatch_size)
-    gen_latents = utils.normalize(gen_latents)
-    
-    torch.save(gen_latents, img_dir + '{0}_{1}_genlatents.pt'.format(model_type, dataset))
-    
-    #Get the initialization for the GAN inversion
-    init, features = inverse_gan_optim.get_init(gen_imgs, model, model_type, y, category, minibatch_size, encoder_file)
-#%%    
-    #Invert the generator to recover the latent vectors
-    recoveredLatents = inverse_gan_optim.get_latent_vector(gen_imgs, y, y_shared, features, init.to(device), model, model_type, device, minibatch_size, rec_lr, alpha, beta, max_iter = 501, epsilon = 0.0001)
-    recoveredLatents = utils.normalize(recoveredLatents)
-    
-    torch.save(recoveredLatents, img_dir + '{0}_{1}_recovered.pt'.format(model_type, dataset))
+    #Larger images need to be split up into batches
+    num_in_batch = 1000
+    batches = int(num_samples/num_in_batch)
+    for batch in range(0,batches):
 
-    
-#%% 
-    
-    #Optimize to get the band images
-    protoLatents = proto_optim(gen_latents, recoveredLatents, model, model_type, device, proto_lr, Lambda, epsilon = 0.0001, minibatch_size = minibatch_size)
-    protoLatents = utils.normalize(protoLatents)
-    
-    torch.save(protoLatents, img_dir + '{0}_{1}_protolatents.pt'.format(model_type, dataset))
-    
+        
+        #Generate random images and the latent vectors
+        gen_imgs, gen_latents, y_shared, y = gan_utils.fake_samples_gen(num_in_batch, model, model_type, category, minibatch_size)
+        gen_latents = utils.normalize(gen_latents)
+        
+        #Get the initialization for the GAN inversion
+        init, features = inverse_gan_optim.get_init(gen_imgs, model, model_type, y, category, minibatch_size, encoder_file)
+    #%%    
+        #Invert the generator to recover the latent vectors
+        recoveredLatents = inverse_gan_optim.get_latent_vector(gen_imgs, y, y_shared, features, init.to(device), model, model_type, device, minibatch_size, rec_lr, alpha, beta, max_iter = 501, epsilon = 0.0001)
+        recoveredLatents = utils.normalize(recoveredLatents)
+        
+    #%% 
+        
+        #Optimize to get the band images
+        protoLatents = proto_optim(gen_latents, recoveredLatents, model, model_type, device, proto_lr, Lambda, epsilon = 0.0001, minibatch_size = minibatch_size)
+        protoLatents = utils.normalize(protoLatents)
+        
+        #Aggregate all the latents
+        genLatents_all.append(gen_latents)
+        recoveredLatents_all.append(recoveredLatents)
+        protoLatents_all.append(protoLatents)
+        
+        genLatents_t = torch.cat(genLatents_all)
+        recoveredLatents_t = torch.cat(recoveredLatents_all)
+        protoLatents_t = torch.cat(protoLatents_all)
+        
+        torch.save(genLatents_t, img_dir + '{0}_{1}_genlatents.pt'.format(model_type, dataset))
+        torch.save(recoveredLatents_t, img_dir + '{0}_{1}_recovered.pt'.format(model_type, dataset))
+        torch.save(protoLatents_t, img_dir + '{0}_{1}_protolatents.pt'.format(model_type, dataset))
+        
+        
+        
     #Get the mean proto latent
-    protoMean = utils.normalize(protoLatents.mean(dim=0).unsqueeze(0))
+    protoMean = utils.normalize(protoLatents_t.mean(dim=0).unsqueeze(0))
     
     #Save the mean proto latent
     torch.save(protoMean, img_dir + '{0}_{1}_protomean.pt'.format(model_type, dataset))
